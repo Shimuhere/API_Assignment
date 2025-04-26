@@ -61,7 +61,7 @@ function displayCountries(countries) {
         // Create a brief description
         const description = `${country.name.common} is a ${country.independent ? 'sovereign' : 'dependent'} country in ${country.region}${country.subregion ? ', ' + country.subregion : ''}, with a population of ${country.population.toLocaleString()} people. The capital ${country.capital?.[0] ? 'is ' + country.capital[0] : 'information is not available'}${languages !== 'N/A' ? '. The main language(s) spoken: ' + languages : ''}.`;
         
-        // Create the card content without the onclick handler
+        // Create the card content with the button at the end
         countryCard.innerHTML = `
             <img src="${country.flags.png}" alt="${country.name.common} flag" class="country-flag">
             <div class="country-info">
@@ -72,8 +72,8 @@ function displayCountries(countries) {
                     <p><strong>Region:</strong> ${country.region}</p>
                     <p><strong>Population:</strong> ${country.population.toLocaleString()}</p>
                 </div>
-                <button class="more-details-btn">More Details</button>
             </div>
+            <button class="more-details-btn">More Details</button>
         `;
         
         // Add event listener after creating the element
