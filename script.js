@@ -61,6 +61,7 @@ function displayCountries(countries) {
         // Create a brief description
         const description = `${country.name.common} is a ${country.independent ? 'sovereign' : 'dependent'} country in ${country.region}${country.subregion ? ', ' + country.subregion : ''}, with a population of ${country.population.toLocaleString()} people. The capital ${country.capital?.[0] ? 'is ' + country.capital[0] : 'information is not available'}${languages !== 'N/A' ? '. The main language(s) spoken: ' + languages : ''}.`;
         
+        // Create the card content without the onclick handler
         countryCard.innerHTML = `
             <img src="${country.flags.png}" alt="${country.name.common} flag" class="country-flag">
             <div class="country-info">
@@ -71,11 +72,13 @@ function displayCountries(countries) {
                     <p><strong>Region:</strong> ${country.region}</p>
                     <p><strong>Population:</strong> ${country.population.toLocaleString()}</p>
                 </div>
-                <button class="more-details-btn" onclick="showDetails('${country.capital?.[0] || ''}', ${JSON.stringify(country).replace(/"/g, '&quot;')})">
-                    More Details
-                </button>
+                <button class="more-details-btn">More Details</button>
             </div>
         `;
+        
+        // Add event listener after creating the element
+        const detailsButton = countryCard.querySelector('.more-details-btn');
+        detailsButton.addEventListener('click', () => showDetails(country.capital?.[0] || '', country));
         
         countryGrid.appendChild(countryCard);
     });
@@ -83,19 +86,24 @@ function displayCountries(countries) {
 
 async function getWeatherData(city) {
     try {
-        // Using a CORS proxy to bypass CORS restrictions
-        const corsProxy = 'https://api.allorigins.win/raw?url=';
-        const encodedUrl = encodeURIComponent(`${WEATHER_API}?q=${city}&appid=${WEATHER_API_KEY}&units=metric`);
+        // Use HTTPS for the API request
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${WEATHER_API_KEY}&units=metric`;
         
-        const response = await fetch(`${corsProxy}${encodedUrl}`, {
+        const response = await fetch(url, {
             method: 'GET',
+            mode: 'cors',
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Accept': 'application/json'
             }
         });
         
-        if (!response.ok) throw new Error('Weather data not available');
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('City not found');
+            }
+            throw new Error('Weather data not available');
+        }
+        
         return await response.json();
     } catch (error) {
         console.error('Error fetching weather:', error);
